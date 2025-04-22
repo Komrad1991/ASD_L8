@@ -10,55 +10,37 @@ using namespace std;
  * the standard input according to the problem statement.
  **/
 
-
-
 int main()
 {
+    int l;
+    cin >> l; cin.ignore();
     int n;
     cin >> n; cin.ignore();
-    int c;
-    cin >> c; cin.ignore();
-    vector<int> all_b;
+    vector<pair<int, int>> cuts;
     for (int i = 0; i < n; i++)
     {
-        int b;
-        cin >> b; cin.ignore();
-        all_b.push_back(b);
+        int length;
+        int value;
+        cin >> length >> value; cin.ignore();
+        cuts.push_back(make_pair(length, value));
     }
-    int total_b = 0;
-    for (auto x : all_b)
-    {
-        total_b += x;
-    }
-    if (total_b < c)
-    {
-        cout << "IMPOSSIBLE" << endl;
-        return 0;
-    }
-    int avr = total_b / all_b.size() - 1;
+    vector<long long> dp(l + 1, 0);
 
-    std::sort(all_b.begin(), all_b.end());
-    int needed = c;
-    vector<int> payers(n, 0);
+    for (int i = 1; i <= l; ++i)
+    {
+        for (const auto& cut : cuts)
+        {
+            int l = cut.first;
+            int v = cut.second;
+            if (i >= l)
+            {
+                if (dp[i - l] + v > dp[i])
+                {
+                    dp[i] = dp[i - l] + v;
+                }
+            }
+        }
+    }
 
-    for (int i = 0; i < n; i++)
-    {
-        int should = needed / (n - i);
-        payers[i] = min(all_b[i], should);
-        needed -= payers[i];
-    }
-    int i = n - 1;
-    while (needed > 0 && i >= 0)
-    {
-        // Calculate how much more can be added without exceeding the budget
-        int add = min(all_b[i] - payers[i], needed);
-        payers[i] += add;
-        needed -= add;
-        --i;
-    }
-    sort(payers.begin(), payers.end());
-    for (int amount : payers)
-    {
-        cout << amount << endl;
-    }
+    cout << dp[l] << endl;
 }
