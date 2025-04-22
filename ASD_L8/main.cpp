@@ -1,46 +1,71 @@
 #include <iostream>
-#include <string>
 #include <vector>
-#include <algorithm>
-
+#include <unordered_map>
+#include <string>
 using namespace std;
 
-/**
- * Auto-generated code below aims at helping you parse
- * the standard input according to the problem statement.
- **/
+unordered_map<char, string> morseCode = {
+    {'A', ".-"}, {'B', "-..."}, {'C', "-.-."}, {'D', "-.."},
+    {'E', "."}, {'F', "..-."}, {'G', "--."}, {'H', "...."},
+    {'I', ".."}, {'J', ".---"}, {'K', "-.-"}, {'L', ".-.."},
+    {'M', "--"}, {'N', "-."}, {'O', "---"}, {'P', ".--."},
+    {'Q', "--.-"}, {'R', ".-."}, {'S', "..."}, {'T', "-"},
+    {'U', "..-"}, {'V', "...-"}, {'W', ".--"}, {'X', "-..-"},
+    {'Y', "-.--"}, {'Z', "--.."}
+};
+
+string wordToMorse(const string& word)
+{
+    string morse;
+    for (char c : word)
+    {
+        morse += morseCode[toupper(c)];
+    }
+    return morse;
+}
 
 int main()
 {
-    int l;
-    cin >> l; cin.ignore();
-    int n;
-    cin >> n; cin.ignore();
-    vector<pair<int, int>> cuts;
-    for (int i = 0; i < n; i++)
-    {
-        int length;
-        int value;
-        cin >> length >> value; cin.ignore();
-        cuts.push_back(make_pair(length, value));
-    }
-    vector<long long> dp(l + 1, 0);
+    string morseSequence;
+    getline(cin, morseSequence);
+    int N;
+    cin >> N;
+    cin.ignore();
 
-    for (int i = 1; i <= l; ++i)
+    vector<string> dictionary(N);
+    for (int i = 0; i < N; ++i)
     {
-        for (const auto& cut : cuts)
+        getline(cin, dictionary[i]);
+    }
+
+    unordered_map<string, int> morseWordCount;
+    for (const string& word : dictionary)
+    {
+        string morseWord = wordToMorse(word);
+        morseWordCount[morseWord]++;
+    }
+
+    int L = morseSequence.length();
+    vector<unsigned long long> dp(L + 1, 0);
+    dp[0] = 1;
+
+    for (int i = 0; i <= L; ++i)
+    {
+        if (dp[i] == 0)
         {
-            int l = cut.first;
-            int v = cut.second;
-            if (i >= l)
+            continue;
+        }
+        for (int len = 1; len <= 100 && i + len <= L; ++len)
+        {
+            string substring = morseSequence.substr(i, len);
+            if (morseWordCount.find(substring) != morseWordCount.end())
             {
-                if (dp[i - l] + v > dp[i])
-                {
-                    dp[i] = dp[i - l] + v;
-                }
+                dp[i + len] += dp[i] * morseWordCount[substring];
             }
         }
     }
 
-    cout << dp[l] << endl;
+    cout << dp[L] << endl;
+
+    return 0;
 }
